@@ -20,9 +20,3 @@ services:
         value: InstaReel Analytics
     healthCheckPath: /dashboard
     autoDeploy: true
-
-  - type: pserv
-    name: insta-reel-db
-    plan: starter
-    region: oregon
-    ipAllowList: []
