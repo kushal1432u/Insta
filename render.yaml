@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: insta-reel-analytics
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18.18.0
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://insta-reel-analytics.onrender.com
+      - key: NEXT_PUBLIC_APP_NAME
+        value: InstaReel Analytics
+    healthCheckPath: /dashboard
+    autoDeploy: true
+
+  - type: pserv
+    name: insta-reel-db
+    plan: starter
+    region: oregon
+    ipAllowList: []
