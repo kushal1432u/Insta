@@ -55,13 +55,10 @@ export function CalendarWithNavigation({
       </div>
       <DayPicker
         month={month}
-        fromDate={props.fromDate}
-        toDate={props.toDate}
-        onSelect={props.onSelect}
-        mode={props.mode}
-        selected={props.selected}
+        onMonthChange={setMonth}
         numberOfMonths={1}
         className="p-3"
+        {...props}
       />
     </div>
   );
