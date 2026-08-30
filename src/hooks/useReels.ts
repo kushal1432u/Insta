@@ -180,7 +180,7 @@ export function useUsernames() {
           .order('username');
 
         if (error) throw error;
-        const uniqueUsernames = [...new Set(data.map(d => d.username))];
+        const uniqueUsernames = Array.from(new Set(data.map((d: any) => d.username))) as string[];
         setUsernames(uniqueUsernames);
       } catch (err) {
         console.error('Failed to fetch usernames:', err);

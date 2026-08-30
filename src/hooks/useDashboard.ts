@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { DashboardMetrics, ChartDataPoint, CampaignComparisonPoint, HighlightCard, FilterState } from '@/types';
 import { calculateEngagementRate, calculateCostPer1kViews, calculateEngagement } from '@/lib/utils';
 
-export function useDashboardMetrics(filters: FilterState = {}) {
+export function useDashboardMetrics(filters: Partial<FilterState> = {}) {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [charts, setCharts] = useState({
     spendVsViews: [] as ChartDataPoint[],
@@ -59,13 +59,13 @@ export function useDashboardMetrics(filters: FilterState = {}) {
 
       // Distribute 4.27 Lac budget
       const TOTAL_BUDGET = 427000;
-      const totalWeight = reels.reduce((sum, r) => {
+      const totalWeight = reels.reduce((sum: number, r: any) => {
         const views = r.total_promotion_views || r.total_views || 0;
         const eng = r.total_promotion_engagement || r.total_engagement || 0;
         return sum + views + (eng * 7.5);
       }, 0);
 
-      reels.forEach(r => {
+      reels.forEach((r: any) => {
         const views = r.total_promotion_views || r.total_views || 0;
         const eng = r.total_promotion_engagement || r.total_engagement || 0;
         const weight = views + (eng * 7.5);
@@ -76,10 +76,10 @@ export function useDashboardMetrics(filters: FilterState = {}) {
       // Calculate aggregate metrics
       const totalPromotionSpend = TOTAL_BUDGET;
       const totalReels = reels.length;
-      const totalViews = reels.reduce((sum, r) => sum + r.total_views, 0);
-      const totalLikes = reels.reduce((sum, r) => sum + r.organic_likes, 0);
-      const totalComments = reels.reduce((sum, r) => sum + r.organic_comments, 0);
-      const totalPromotionEngagement = reels.reduce((sum, r) => sum + r.total_promotion_engagement, 0);
+      const totalViews = reels.reduce((sum: number, r: any) => sum + r.total_views, 0);
+      const totalLikes = reels.reduce((sum: number, r: any) => sum + r.organic_likes, 0);
+      const totalComments = reels.reduce((sum: number, r: any) => sum + r.organic_comments, 0);
+      const totalPromotionEngagement = reels.reduce((sum: number, r: any) => sum + r.total_promotion_engagement, 0);
       const totalEngagement = totalLikes + totalComments + totalPromotionEngagement;
       const avgViewsPerReel = totalReels > 0 ? Math.round(totalViews / totalReels) : 0;
       const costPer1kViews = calculateCostPer1kViews(totalPromotionSpend, totalViews);
@@ -99,7 +99,7 @@ export function useDashboardMetrics(filters: FilterState = {}) {
 
       // Build charts data
       // Spend vs Views (scatter data)
-      const spendVsViews = reels.map(r => ({
+      const spendVsViews = reels.map((r: any) => ({
         date: r.published_date,
         views: r.total_views,
         spend: r.total_promotion_spend,
@@ -108,7 +108,7 @@ export function useDashboardMetrics(filters: FilterState = {}) {
 
       // Views over time (group by month)
       const viewsByMonth: Record<string, { views: number; engagement: number; spend: number }> = {};
-      reels.forEach(r => {
+      reels.forEach((r: any) => {
         const month = r.published_date.slice(0, 7); // YYYY-MM
         if (!viewsByMonth[month]) {
           viewsByMonth[month] = { views: 0, engagement: 0, spend: 0 };
@@ -131,7 +131,7 @@ export function useDashboardMetrics(filters: FilterState = {}) {
       }));
 
       // Campaign comparison
-      const campaignComparison = campaigns.map(c => ({
+      const campaignComparison = campaigns.map((c: any) => ({
         campaign_id: c.id,
         campaign_name: c.name,
         spend: c.actual_spend,
@@ -150,14 +150,14 @@ export function useDashboardMetrics(filters: FilterState = {}) {
 
       // Highlights
       if (reels.length > 0) {
-        const mostViewed = reels.reduce((max, r) => r.total_views > max.total_views ? r : max, reels[0]);
-        const mostLiked = reels.reduce((max, r) => r.organic_likes > max.organic_likes ? r : max, reels[0]);
-        const mostCommented = reels.reduce((max, r) => r.organic_comments > max.organic_comments ? r : max, reels[0]);
-        const highestEngagement = reels.reduce((max, r) => r.engagement_rate > max.engagement_rate ? r : max, reels[0]);
-        const highestSpend = reels.reduce((max, r) => r.total_promotion_spend > max.total_promotion_spend ? r : max, reels[0]);
+        const mostViewed = reels.reduce((max: any, r: any) => r.total_views > max.total_views ? r : max, reels[0]);
+        const mostLiked = reels.reduce((max: any, r: any) => r.organic_likes > max.organic_likes ? r : max, reels[0]);
+        const mostCommented = reels.reduce((max: any, r: any) => r.organic_comments > max.organic_comments ? r : max, reels[0]);
+        const highestEngagement = reels.reduce((max: any, r: any) => r.engagement_rate > max.engagement_rate ? r : max, reels[0]);
+        const highestSpend = reels.reduce((max: any, r: any) => r.total_promotion_spend > max.total_promotion_spend ? r : max, reels[0]);
         const mostCostEfficient = reels
-          .filter(r => r.total_promotion_spend > 0 && r.total_views > 0)
-          .reduce((min, r) => r.cost_per_1k_views < min.cost_per_1k_views ? r : min, reels[0]);
+          .filter((r: any) => r.total_promotion_spend > 0 && r.total_views > 0)
+          .reduce((min: any, r: any) => r.cost_per_1k_views < min.cost_per_1k_views ? r : min, reels[0]);
 
         setHighlights([
           {
