@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -15,7 +15,7 @@ import { loginSchema, signupSchema } from '@/lib/validations';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
@@ -34,7 +34,7 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '', full_name: '', confirm_password: '' },
   });
 
-  const handleLogin = async (values: { email: string; password: string }) => {
+  const handleLogin = async (values: any) => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -42,67 +42,65 @@ export default function LoginPage() {
         password: values.password,
       });
 
-      if (error) throw error;
-      success('Welcome back!');
-      router.push(redirectTo);
-      router.refresh();
-    } catch (err) {
-      toastError(err instanceof Error ? err.message : 'Login failed');
+      if (error) {
+        toastError('Login Failed', error.message);
+      } else {
+        success('Success', 'Logged in successfully');
+        router.push(redirectTo);
+        router.refresh();
+      }
+    } catch (error: any) {
+      toastError('Error', error.message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSignup = async (values: { email: string; password: string; full_name: string }) => {
+  const handleSignup = async (values: any) => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
-          data: { full_name: values.full_name },
+          data: {
+            full_name: values.full_name,
+          },
         },
       });
 
-      if (error) throw error;
-      success('Account created! Please check your email to confirm.');
-      setIsSignup(false);
-    } catch (err) {
-      toastError(err instanceof Error ? err.message : 'Signup failed');
+      if (error) {
+        toastError('Signup Failed', error.message);
+      } else {
+        success('Success', 'Account created successfully! You can now log in.');
+        setIsSignup(false);
+      }
+    } catch (error: any) {
+      toastError('Error', error.message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-instagram-pink/5 via-instagram-purple/5 to-instagram-orange/5 p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-instagram-pink via-instagram-purple to-instagram-orange">
-              <BarChart3 className="h-7 w-7 text-white" />
-            </div>
-            <span className="font-bold text-2xl bg-gradient-to-r from-instagram-pink via-instagram-purple to-instagram-orange bg-clip-text text-transparent">
-              InstaReel
-            </span>
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {isSignup ? 'Create your account' : 'Welcome back'}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {isSignup
-              ? 'Enter your details to get started'
-              : 'Sign in to access your analytics dashboard'}
-          </p>
+        <div className="flex justify-center mb-8">
+          <div className="rounded-full bg-primary/10 p-4">
+            <BarChart3 className="h-10 w-10 text-primary" />
+          </div>
         </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">{isSignup ? 'Sign up' : 'Sign in'}</CardTitle>
-            <CardDescription>
-              {isSignup
-                ? 'Create an account to access the dashboard'
-                : 'Enter your credentials to access your account'}
+        
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="space-y-1 pb-6 text-center">
+            <CardTitle className="text-2xl font-bold tracking-tight text-gray-900">
+              {isSignup ? 'Create an account' : 'Welcome back'}
+            </CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
+              {isSignup 
+                ? 'Enter your details to create your account' 
+                : 'Enter your credentials to access your account'
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -115,32 +113,34 @@ export default function LoginPage() {
                     placeholder="John Doe"
                     {...signupForm.register('full_name')}
                     disabled={isLoading}
+                    className="h-11"
                   />
                   {signupForm.formState.errors.full_name && (
                     <p className="text-sm text-destructive">{signupForm.formState.errors.full_name.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="signup-email">Email</Label>
                   <Input
-                    id="email"
+                    id="signup-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="name@example.com"
                     {...signupForm.register('email')}
                     disabled={isLoading}
+                    className="h-11"
                   />
                   {signupForm.formState.errors.email && (
                     <p className="text-sm text-destructive">{signupForm.formState.errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="signup-password">Password</Label>
                   <Input
-                    id="password"
+                    id="signup-password"
                     type="password"
-                    placeholder="••••••••"
                     {...signupForm.register('password')}
                     disabled={isLoading}
+                    className="h-11"
                   />
                   {signupForm.formState.errors.password && (
                     <p className="text-sm text-destructive">{signupForm.formState.errors.password.message}</p>
@@ -151,16 +151,16 @@ export default function LoginPage() {
                   <Input
                     id="confirm_password"
                     type="password"
-                    placeholder="••••••••"
                     {...signupForm.register('confirm_password')}
                     disabled={isLoading}
+                    className="h-11"
                   />
                   {signupForm.formState.errors.confirm_password && (
                     <p className="text-sm text-destructive">{signupForm.formState.errors.confirm_password.message}</p>
                   )}
                 </div>
-                <Button type="submit" className="w-full" loading={isLoading}>
-                  Create Account
+                <Button type="submit" className="w-full h-11 text-base font-medium" loading={isLoading}>
+                  Sign Up
                 </Button>
               </form>
             ) : (
@@ -170,28 +170,34 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="name@example.com"
                     {...loginForm.register('email')}
                     disabled={isLoading}
+                    className="h-11"
                   />
                   {loginForm.formState.errors.email && (
                     <p className="text-sm text-destructive">{loginForm.formState.errors.email.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Link href="#" className="text-sm font-medium text-primary hover:underline">
+                      Forgot password?
+                    </Link>
+                  </div>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
                     {...loginForm.register('password')}
                     disabled={isLoading}
+                    className="h-11"
                   />
                   {loginForm.formState.errors.password && (
                     <p className="text-sm text-destructive">{loginForm.formState.errors.password.message}</p>
                   )}
                 </div>
-                <Button type="submit" className="w-full" loading={isLoading}>
+                <Button type="submit" className="w-full h-11 text-base font-medium" loading={isLoading}>
                   Sign In
                 </Button>
               </form>
@@ -202,8 +208,9 @@ export default function LoginPage() {
             <p className="text-sm text-muted-foreground text-center">
               {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
+                type="button"
                 onClick={() => setIsSignup(!isSignup)}
-                className="text-primary font-medium hover:underline"
+                className="text-primary font-medium hover:underline focus:outline-none"
               >
                 {isSignup ? 'Sign in' : 'Sign up'}
               </button>
@@ -215,5 +222,13 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
