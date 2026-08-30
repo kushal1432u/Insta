@@ -93,7 +93,7 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src="/profile.jpg" alt={user?.full_name || ''} />
+                  <AvatarImage src="" alt={user?.full_name || ''} />
                   <AvatarFallback>{user?.full_name?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
               </Button>
