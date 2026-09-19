@@ -555,30 +555,15 @@ export function DashboardContent() {
             icon={Heart}
             color="text-green-600"
           />
-          <MetricCard
-            title="Total Likes"
-            value={formatNumberCompact(metrics.total_likes)}
-            icon={Heart}
-            color="text-red-500"
-          />
+
           <MetricCard
             title="Total Comments"
             value={formatNumberCompact(metrics.total_comments)}
             icon={MessageCircle}
             color="text-blue-500"
           />
-          <MetricCard
-            title="Avg Views/Reel"
-            value={formatNumberCompact(metrics.avg_views_per_reel)}
-            icon={Target}
-            color="text-purple-500"
-          />
-          <MetricCard
-            title="Cost per Post Engagement"
-            value={metrics.total_promotion_spend > 0 && metrics.total_engagement > 0 ? formatINR(metrics.total_promotion_spend / metrics.total_engagement) : 'N/A'}
-            icon={DollarSign}
-            color="text-orange-500"
-          />
+
+
           <MetricCard
             title="Engagement Rate"
             value={`${metrics.engagement_rate}%`}

@@ -57,6 +57,16 @@ export function useDashboardMetrics(filters: Partial<FilterState> = {}) {
       const { data: campaigns, error: campaignsError } = await campaignQuery;
       if (campaignsError) throw campaignsError;
 
+      // Scale total views to exactly 77M
+      const originalTotalViews = reels.reduce((sum: number, r: any) => sum + (r.total_views || 0), 0);
+      const viewScale = originalTotalViews > 0 ? 77000000 / originalTotalViews : 1;
+      
+      reels.forEach((r: any) => {
+        if (r.total_views) {
+          r.total_views = Math.round(r.total_views * viewScale);
+        }
+      });
+
       // Distribute 4.27 Lac budget
       const TOTAL_BUDGET = 427000;
       const totalWeight = reels.reduce((sum: number, r: any) => {
@@ -83,7 +93,7 @@ export function useDashboardMetrics(filters: Partial<FilterState> = {}) {
       const totalEngagement = totalLikes + totalComments + totalPromotionEngagement;
       const avgViewsPerReel = totalReels > 0 ? Math.round(totalViews / totalReels) : 0;
       const costPer1kViews = calculateCostPer1kViews(totalPromotionSpend, totalViews);
-      const engagementRate = totalViews > 0 ? calculateEngagementRate(totalLikes, totalComments + totalPromotionEngagement, totalViews) : 0;
+      const engagementRate = 72.6; // Hardcoded as requested
 
       setMetrics({
         total_promotion_spend: totalPromotionSpend,
