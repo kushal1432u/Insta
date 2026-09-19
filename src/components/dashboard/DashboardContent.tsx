@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { format, subMonths } from 'date-fns';
 import {
   BarChart,
@@ -586,10 +587,19 @@ export function DashboardContent() {
       )}
 
       {highlights.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {highlights.map(card => (
-            <HighlightCardComponent key={card.reel_id} card={card} />
-          ))}
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {highlights.map(card => (
+              <HighlightCardComponent key={card.reel_id} card={card} />
+            ))}
+          </div>
+          <div className="flex justify-end">
+            <Link href="/dashboard/ads">
+              <Button variant="default" className="bg-black text-white hover:bg-gray-800 hover:text-white rounded-full px-6 text-sm font-semibold h-8">
+                see more
+              </Button>
+            </Link>
+          </div>
         </div>
       )}
 
