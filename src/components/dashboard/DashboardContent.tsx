@@ -540,7 +540,7 @@ export function DashboardContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Total Promotion Spend"
-            value={formatINRCompact(metrics.total_promotion_spend)}
+            value={formatINR(metrics.total_promotion_spend)}
             icon={DollarSign}
             color="text-instagram-pink"
             subtitle={
