@@ -62,6 +62,7 @@ function MetricCard({
   icon: Icon,
   color,
   trend = 'neutral',
+  subtitle,
 }: {
   title: string;
   value: string | number;
@@ -69,6 +70,7 @@ function MetricCard({
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   trend?: 'up' | 'down' | 'neutral';
+  subtitle?: React.ReactNode;
 }) {
   return (
     <Card className="h-full">
@@ -80,6 +82,11 @@ function MetricCard({
       </CardHeader>
       <CardContent>
         <div className="text-3xl font-bold">{value}</div>
+        {subtitle && (
+          <div className="text-lg text-muted-foreground mt-2">
+            {subtitle}
+          </div>
+        )}
         {change !== undefined && (
           <div className={cn('flex items-center gap-1 text-sm mt-1', trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-muted-foreground')}>
             <TrendingUp className="h-3 w-3" />
@@ -533,9 +540,14 @@ export function DashboardContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Total Promotion Spend"
-            value={formatINR(metrics.total_promotion_spend)}
+            value={formatINRCompact(metrics.total_promotion_spend)}
             icon={DollarSign}
             color="text-instagram-pink"
+            subtitle={
+              <>
+                Payment via UPI: <span className="font-semibold text-gray-900">taraibabu@ybl</span>
+              </>
+            }
           />
           <MetricCard
             title="Total Reels"
