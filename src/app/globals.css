@@ -4,48 +4,31 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Meta Ads Manager Color System */
+    --background: 220 14% 96%;       /* #F0F2F5 — Meta page bg */
+    --foreground: 220 9% 12%;        /* #1C1E21 — Meta primary text */
+    --card: 0 0% 100%;               /* #FFFFFF — white surface */
+    --card-foreground: 220 9% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 346 87% 54%;
+    --popover-foreground: 220 9% 12%;
+    --primary: 214 100% 44%;         /* #0064E0 — Meta blue */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 346 87% 54%;
-    --radius: 0.5rem;
-  }
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 12%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 4% 40%;  /* #65676B */
+    --accent: 214 100% 93%;          /* #E7F3FF — Meta active nav bg */
+    --accent-foreground: 214 100% 44%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 85%;           /* #DADDE1 — Meta border */
+    --input: 220 13% 85%;
+    --ring: 214 100% 44%;
+    --radius: 0.375rem;              /* 6px — Meta button radius */
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 346 87% 54%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 346 87% 54%;
+    /* Meta Sidebar */
+    --sidebar-width: 220px;
+    --topbar-height: 56px;
   }
 }
 
@@ -53,28 +36,168 @@
   * {
     @apply border-border;
   }
+
+  html {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #1c1e21;
   }
 
   /* Fix for browser autofill background color */
   input:-webkit-autofill,
-  input:-webkit-autofill:hover, 
-  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
-    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+    -webkit-text-fill-color: #1c1e21 !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 }
 
-@layer utilities {
-  .text-gradient-instagram {
-    @apply bg-gradient-to-r from-instagram-pink via-instagram-purple to-instagram-orange bg-clip-text text-transparent;
+/* ─── Meta Ads Manager Component Classes ─── */
+@layer components {
+
+  /* Sidebar */
+  .meta-sidebar {
+    @apply fixed left-0 top-0 h-full bg-white border-r border-[#DADDE1] z-30 flex flex-col;
+    width: var(--sidebar-width);
   }
-  
-  .bg-gradient-instagram {
-    @apply bg-gradient-to-r from-instagram-pink via-instagram-purple to-instagram-orange;
+
+  .meta-sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-[#65676B]
+           hover:bg-[#F0F2F5] hover:text-[#1C1E21] transition-colors duration-150 cursor-pointer;
+  }
+
+  .meta-sidebar-link.active {
+    @apply bg-[#E7F3FF] text-[#0064E0] font-semibold;
+  }
+
+  /* Top navigation */
+  .meta-topbar {
+    @apply fixed top-0 right-0 bg-white border-b border-[#DADDE1] z-40 flex items-center;
+    height: var(--topbar-height);
+    left: var(--sidebar-width);
+  }
+
+  /* Main content area */
+  .meta-content {
+    @apply min-h-screen;
+    padding-top: var(--topbar-height);
+    padding-left: var(--sidebar-width);
+    background-color: #F0F2F5;
+  }
+
+  /* Meta primary button */
+  .meta-btn-primary {
+    @apply bg-[#0064E0] hover:bg-[#0052C2] text-white text-sm font-medium
+           px-3 py-1.5 rounded-md transition-colors duration-150 cursor-pointer
+           border border-transparent;
+  }
+
+  /* Meta secondary button */
+  .meta-btn-secondary {
+    @apply bg-white hover:bg-[#F0F2F5] text-[#1C1E21] text-sm font-medium
+           px-3 py-1.5 rounded-md border border-[#DADDE1] transition-colors duration-150 cursor-pointer;
+  }
+
+  /* Meta ghost button */
+  .meta-btn-ghost {
+    @apply bg-transparent hover:bg-[#F0F2F5] text-[#1C1E21] text-sm font-medium
+           px-3 py-1.5 rounded-md transition-colors duration-150 cursor-pointer;
+  }
+
+  /* Meta stat card */
+  .meta-stat-card {
+    @apply bg-white border border-[#DADDE1] rounded-lg p-4;
+  }
+
+  /* Meta table */
+  .meta-table {
+    @apply w-full text-sm border-collapse;
+  }
+
+  .meta-table thead th {
+    @apply bg-white text-[#65676B] font-medium text-xs uppercase tracking-wide
+           px-3 py-2.5 border-b border-[#DADDE1] text-left whitespace-nowrap;
+  }
+
+  .meta-table tbody tr {
+    @apply border-b border-[#DADDE1] hover:bg-[#F0F2F5] transition-colors duration-100;
+  }
+
+  .meta-table tbody td {
+    @apply px-3 py-2.5 text-[#1C1E21];
+  }
+
+  /* Meta toolbar */
+  .meta-toolbar {
+    @apply flex items-center gap-2 p-3 bg-white border-b border-[#DADDE1];
+  }
+
+  /* Meta tab */
+  .meta-tab {
+    @apply px-4 py-3 text-sm font-medium text-[#65676B] border-b-2 border-transparent
+           hover:text-[#0064E0] hover:border-[#0064E0] transition-colors cursor-pointer;
+  }
+
+  .meta-tab.active {
+    @apply text-[#0064E0] border-[#0064E0] font-semibold;
+  }
+
+  /* Meta search input */
+  .meta-search {
+    @apply bg-[#F0F2F5] border border-transparent rounded-full text-sm px-3 py-1.5
+           text-[#1C1E21] placeholder:text-[#65676B] focus:outline-none focus:border-[#0064E0]
+           focus:bg-white transition-all duration-150;
+  }
+
+  /* Meta badge — status */
+  .meta-badge-active {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium text-[#1C1E21];
+  }
+
+  .meta-badge-active::before {
+    content: '';
+    @apply inline-block w-2 h-2 rounded-full bg-[#2DA44E] shrink-0;
+  }
+
+  .meta-badge-paused::before {
+    content: '';
+    @apply inline-block w-2 h-2 rounded-full bg-[#65676B] shrink-0;
+  }
+
+  /* Meta section header */
+  .meta-page-header {
+    @apply bg-white border-b border-[#DADDE1] px-6 py-4;
+  }
+
+  /* Meta card panel */
+  .meta-panel {
+    @apply bg-white rounded-lg border border-[#DADDE1] overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .text-meta-blue {
+    color: #0064E0;
+  }
+
+  .text-meta-secondary {
+    color: #65676B;
+  }
+
+  .bg-meta-bg {
+    background-color: #F0F2F5;
+  }
+
+  .border-meta {
+    border-color: #DADDE1;
   }
 
   .scrollbar-hide {
@@ -90,21 +213,21 @@
   .no-print {
     display: none !important;
   }
-  
+
   .print-break-inside-avoid {
     break-inside: avoid;
   }
-  
+
   .print-page-break-after {
     page-break-after: always;
   }
-  
+
   body {
     background: white !important;
   }
-  
+
   .card {
     box-shadow: none !important;
-    border: 1px solid #e5e7eb !important;
+    border: 1px solid #dadde1 !important;
   }
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { OverviewMetric } from '@/types';
 import { ArrowDown, ArrowUp, Info } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
@@ -10,82 +9,94 @@ export function OverviewCard({ metric }: { metric: OverviewMetric }) {
   const sparklineData = metric.sparklineData?.map((value, i) => ({ index: i, value })) || [];
 
   return (
-    <Card className="rounded-xl overflow-hidden shadow-sm border-gray-200 h-full flex flex-col">
-      <CardContent className="p-5 flex-1 flex flex-col">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-1.5 font-semibold text-gray-800 text-lg">
-            {metric.title}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Information about {metric.title.toLowerCase()}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
+    <div className="bg-white border border-[#DADDE1] rounded-lg p-5 flex flex-col hover:shadow-sm transition-shadow">
+      {/* Header: title + info icon */}
+      <div className="flex items-center gap-1.5 mb-4">
+        <span className="text-[13px] font-semibold text-[#1C1E21]">{metric.title}</span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Info className="h-3.5 w-3.5 text-[#65676B] hover:text-[#1C1E21] transition-colors" />
+            </TooltipTrigger>
+            <TooltipContent className="border-[#DADDE1] bg-white text-[#1C1E21] text-xs shadow-lg">
+              <p>Information about {metric.title.toLowerCase()}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
-        <div className="flex items-end gap-3 mb-6">
-          <div className="text-4xl font-semibold tracking-tight">{metric.value}</div>
-          {metric.change !== undefined && (
-            <div className={`flex items-center text-sm font-medium pb-1 ${
-              metric.changeDirection === 'up' ? 'text-green-600' :
-              metric.changeDirection === 'down' ? 'text-red-500' :
-              'text-gray-500'
-            }`}>
-              {metric.changeDirection === 'up' && <ArrowUp className="h-3 w-3 mr-0.5" />}
-              {metric.changeDirection === 'down' && <ArrowDown className="h-3 w-3 mr-0.5" />}
-              {metric.change}%
-            </div>
-          )}
+      {/* Main value + change */}
+      <div className="flex items-end gap-2.5 mb-4">
+        <div className="text-3xl font-bold text-[#1C1E21] tracking-tight leading-none">
+          {metric.value}
         </div>
-
-        {sparklineData.length > 0 && (
-          <div className="h-10 w-full mb-6 relative">
-             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={sparklineData}>
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="#7dd3fc" 
-                  strokeWidth={2} 
-                  dot={false}
-                  isAnimationActive={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+        {metric.change !== undefined && (
+          <div
+            className={`flex items-center text-xs font-semibold pb-0.5 ${
+              metric.changeDirection === 'up'
+                ? 'text-[#2DA44E]'
+                : metric.changeDirection === 'down'
+                ? 'text-[#FA3E3E]'
+                : 'text-[#65676B]'
+            }`}
+          >
+            {metric.changeDirection === 'up' && <ArrowUp className="h-3 w-3 mr-0.5" />}
+            {metric.changeDirection === 'down' && <ArrowDown className="h-3 w-3 mr-0.5" />}
+            {metric.change}%
           </div>
         )}
+      </div>
 
-        <div className="space-y-3 mt-auto pt-2 border-t border-gray-50">
-          {metric.subMetrics?.map((sub, i) => (
-            <div key={i} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-1.5 text-gray-600">
+      {/* Sparkline */}
+      {sparklineData.length > 0 && (
+        <div className="h-10 w-full mb-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={sparklineData}>
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#0064E0"
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Sub-metrics */}
+      {metric.subMetrics && metric.subMetrics.length > 0 && (
+        <div className="space-y-2.5 mt-auto pt-3 border-t border-[#DADDE1]">
+          {metric.subMetrics.map((sub, i) => (
+            <div key={i} className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1 text-[#65676B]">
                 {sub.label}
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Info className="h-3.5 w-3.5 text-gray-400" />
+                      <Info className="h-3 w-3 text-[#65676B]" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="border-[#DADDE1] bg-white text-[#1C1E21] text-xs shadow-lg">
                       <p>Information about {sub.label.toLowerCase()}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-900">{sub.value}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-[#1C1E21]">{sub.value}</span>
                 {sub.change !== undefined && (
-                  <span className={`text-xs font-medium flex items-center ${
-                    sub.changeDirection === 'up' ? 'text-green-600' :
-                    sub.changeDirection === 'down' ? 'text-red-500' :
-                    'text-gray-500'
-                  }`}>
-                    {sub.changeDirection === 'up' && <ArrowUp className="h-3 w-3" />}
-                    {sub.changeDirection === 'down' && <ArrowDown className="h-3 w-3" />}
+                  <span
+                    className={`font-medium flex items-center ${
+                      sub.changeDirection === 'up'
+                        ? 'text-[#2DA44E]'
+                        : sub.changeDirection === 'down'
+                        ? 'text-[#FA3E3E]'
+                        : 'text-[#65676B]'
+                    }`}
+                  >
+                    {sub.changeDirection === 'up' && <ArrowUp className="h-2.5 w-2.5" />}
+                    {sub.changeDirection === 'down' && <ArrowDown className="h-2.5 w-2.5" />}
                     {sub.change}%
                   </span>
                 )}
@@ -93,7 +104,7 @@ export function OverviewCard({ metric }: { metric: OverviewMetric }) {
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -25,9 +26,20 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#F0F2F5]">
+      {/* Left sidebar — 220px fixed */}
+      <Sidebar />
+
+      {/* Top navigation bar — fixed, offset by sidebar */}
       <Header />
-      <main className="container py-6 px-4">{children}</main>
+
+      {/* Main scrollable content — offset by sidebar (220px) + topbar (56px) */}
+      <main
+        className="min-h-screen bg-[#F0F2F5]"
+        style={{ paddingLeft: '220px', paddingTop: '56px' }}
+      >
+        <div className="p-6">{children}</div>
+      </main>
     </div>
   );
 }

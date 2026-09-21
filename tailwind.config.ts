@@ -50,12 +50,26 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // ─── Meta Ads Manager Brand Colors ───
+        meta: {
+          blue: '#0064E0',
+          blueDark: '#0052C2',
+          blueLight: '#E7F3FF',
+          bg: '#F0F2F5',
+          text: '#1C1E21',
+          textSecondary: '#65676B',
+          border: '#DADDE1',
+          white: '#FFFFFF',
+          green: '#2DA44E',
+          red: '#FA3E3E',
+          yellow: '#F5A623',
+        },
+        // ─── Keep Instagram colors for badge variant only ───
         instagram: {
           pink: '#E1306C',
           purple: '#833AB4',
           orange: '#F77737',
           yellow: '#FCAF45',
-          gradient: 'linear-gradient(45deg, #E1306C, #833AB4, #F77737, #FCAF45)',
         },
       },
       borderRadius: {

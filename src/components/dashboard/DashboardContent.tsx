@@ -16,478 +16,236 @@ import {
   Line,
   AreaChart,
   Area,
-  ScatterChart,
-  Scatter,
 } from 'recharts';
-import { DashboardMetrics, ChartDataPoint, CampaignComparisonPoint, HighlightCard, FilterState } from '@/types';
+import { DashboardMetrics, ChartDataPoint, HighlightCard, FilterState } from '@/types';
 import { useDashboardMetrics } from '@/hooks/useDashboard';
-import { useReels, useUsernames } from '@/hooks/useReels';
+import { useReels } from '@/hooks/useReels';
 import { useAuth } from '@/hooks/useAuth';
 import { useManageReels } from '@/hooks/useManageReels';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatINR, formatINRCompact, formatNumber, formatNumberCompact, formatDate } from '@/lib/utils';
 import {
   TrendingUp,
+  TrendingDown,
   Eye,
   Heart,
   MessageCircle,
   DollarSign,
   Target,
-  Award,
-  Filter,
-  Download,
-  Printer,
-  Users,
   BarChart3,
   Edit,
-  Trash2
+  Trash2,
+  ChevronDown,
+  Info,
+  Calendar,
+  Download,
+  Plus,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { ExportButton } from '@/components/dashboard/ExportButton';
 import { InstagramPreview } from '@/components/ui/instagram-preview';
 import { ReelEditorDialog } from '@/components/dashboard/ReelEditorDialog';
 
-const COLORS = ['#E1306C', '#833AB4', '#F77737', '#FCAF45', '#0095F6', '#262626'];
-
-function MetricCard({
-  title,
+// ─── Stat Card (100% Meta Ads Manager style) ────────────────────────────────
+function StatCard({
+  label,
   value,
+  subValue,
   change,
-  icon: Icon,
-  color,
-  trend = 'neutral',
-  subtitle,
+  info,
 }: {
-  title: string;
+  label: string;
   value: string | number;
+  subValue?: string;
   change?: number;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-  trend?: 'up' | 'down' | 'neutral';
-  subtitle?: React.ReactNode;
+  info?: string;
 }) {
+  const isUp = change !== undefined && change >= 0;
+  const isDown = change !== undefined && change < 0;
+
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-          <Icon className={cn('h-5 w-5', color)} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold">{value}</div>
-        {subtitle && (
-          <div className="text-lg text-muted-foreground mt-2">
-            {subtitle}
-          </div>
+    <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col gap-1 hover:border-blue-500 hover:shadow-sm transition-all cursor-default group">
+      <div className="flex items-center gap-1 text-[11px] text-[#65676B] font-semibold uppercase tracking-wide">
+        {label}
+        {info && (
+          <span title={info}>
+            <Info className="h-3 w-3 text-[#65676B] cursor-help opacity-60 group-hover:opacity-100" />
+          </span>
         )}
-        {change !== undefined && (
-          <div className={cn('flex items-center gap-1 text-sm mt-1', trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-muted-foreground')}>
-            <TrendingUp className="h-3 w-3" />
-            <span>{change >= 0 ? '+' : ''}{change}%</span>
-            <span className="text-muted-foreground">vs last period</span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function HighlightCardComponent({ card }: { card: HighlightCard }) {
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    views: Eye,
-    likes: Heart,
-    comments: MessageCircle,
-    engagement_rate: Target,
-    spend: DollarSign,
-    cost_efficiency: Award,
-  };
-
-  const IconComponent = iconMap[card.metric_type] || Eye;
-
-  return (
-    <Card className="h-full border-l-4 border-instagram-pink">
-      <CardContent className="pt-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
-            {card.reel_url && (
-              <InstagramPreview url={card.reel_url} size="small" className="shrink-0" />
-            )}
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-muted-foreground truncate">{card.label}</p>
-              <p className="text-lg font-semibold mt-1 truncate">{card.value}</p>
-              <p className="text-xs text-muted-foreground mt-1 truncate">
-                {card.reel_title || 'Untitled'}
-              </p>
-            </div>
-          </div>
-          <IconComponent className="h-6 w-6 text-instagram-pink/50 shrink-0" />
+      </div>
+      <div className="text-[22px] font-bold text-[#1C1E21] tracking-tight leading-tight mt-1">
+        {value}
+      </div>
+      {subValue && <div className="text-[11px] text-[#65676B] mt-0.5">{subValue}</div>}
+      {change !== undefined && (
+        <div className={`flex items-center gap-1 text-[11px] font-semibold mt-0.5 ${isUp ? 'text-[#2DA44E]' : 'text-[#FA3E3E]'}`}>
+          {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+          {isUp ? '+' : ''}{change}% vs last period
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }
 
-function SpendVsViewsChart({ data }: { data: ChartDataPoint[] }) {
+// ─── Meta-style Chart Card ────────────────────────────────────────────────────
+function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4" />
-          Promotion Spend vs Views
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="spend"
-                name="Promotion Spend (₹)"
-                tickFormatter={(v) => formatINRCompact(v)}
-                type="number"
-              />
-              <YAxis
-                dataKey="views"
-                name="Total Views"
-                tickFormatter={(v) => formatNumberCompact(v)}
-                type="number"
-              />
-              <Tooltip
-                formatter={(value: number, name: string) => [
-                  name === 'spend' ? formatINR(value) : formatNumber(value),
-                  name,
-                ]}
-              />
-              <Legend />
-              <Scatter
-                name="Reels"
-                data={data.map(d => ({ x: d.spend, y: d.views, spend: d.spend, views: d.views, reel_title: d.reel_title }))}
-                fill="#E1306C"
-                stroke="#E1306C"
-              />
-            </ScatterChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="bg-white border border-[#DADDE1] rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#DADDE1]">
+        <h3 className="text-sm font-semibold text-[#1C1E21]">{title}</h3>
+        <button className="flex items-center gap-1 text-xs text-[#65676B] hover:text-[#1C1E21] transition-colors">
+          <BarChart3 className="h-3.5 w-3.5" />
+          Chart
+          <ChevronDown className="h-3 w-3" />
+        </button>
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
   );
 }
 
-function ViewsOverTimeChart({ data }: { data: ChartDataPoint[] }) {
-  return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4" />
-          Views Over Time
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#E1306C" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#E1306C" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tickFormatter={(v) => format(new Date(v + '-01'), 'MMM yy')} />
-              <YAxis tickFormatter={(v) => formatNumberCompact(v)} />
-              <Tooltip formatter={(v: number) => [formatNumber(v), 'Views']} />
-              <Area
-                type="monotone"
-                dataKey="views"
-                stroke="#E1306C"
-                fillOpacity={1}
-                fill="url(#colorViews)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function EngagementOverTimeChart({ data }: { data: ChartDataPoint[] }) {
-  return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Heart className="h-4 w-4" />
-          Engagement Over Time
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tickFormatter={(v) => format(new Date(v + '-01'), 'MMM yy')} />
-              <YAxis tickFormatter={(v) => formatNumberCompact(v)} />
-              <Tooltip
-                formatter={(v: number, name: string) => [
-                  formatNumber(v),
-                  name === 'engagement' ? 'Engagement' : name === 'views' ? 'Views' : 'Spend',
-                ]}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="engagement"
-                stroke="#E1306C"
-                strokeWidth={2}
-                dot={{ fill: '#E1306C', strokeWidth: 2 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="views"
-                stroke="#833AB4"
-                strokeWidth={2}
-                dot={{ fill: '#833AB4', strokeWidth: 2 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="spend"
-                stroke="#F77737"
-                strokeWidth={2}
-                dot={{ fill: '#F77737', strokeWidth: 2 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function CampaignComparisonChart({ data }: { data: CampaignComparisonPoint[] }) {
-  return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4" />
-          Campaign Comparison
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" tickFormatter={(v) => formatINRCompact(v)} />
-              <YAxis dataKey="campaign_name" type="category" width={120} />
-              <Tooltip
-                formatter={(v: number, name: string) => [
-                  name === 'spend' ? formatINR(v) : formatNumber(v),
-                  name,
-                ]}
-              />
-              <Legend />
-              <Bar dataKey="spend" fill="#E1306C" name="Spend" radius={[0, 4, 4, 0]} />
-              <Bar dataKey="views" fill="#833AB4" name="Views" radius={[0, 4, 4, 0]} />
-              <Bar dataKey="engagement" fill="#F77737" name="Engagement" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function TopReelsTable({ reels, onRefetch }: { reels: any[], onRefetch: () => void }) {
+// ─── Top Reels Table ──────────────────────────────────────────────────────────
+function TopReelsTable({ reels, onRefetch }: { reels: any[]; onRefetch: () => void }) {
   const { isAdmin } = useAuth();
   const { deleteReel } = useManageReels();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingReel, setEditingReel] = useState<any | null>(null);
 
-  const handleEdit = (reel: any) => {
-    setEditingReel(reel);
-    setEditorOpen(true);
-  };
-
+  const handleEdit = (reel: any) => { setEditingReel(reel); setEditorOpen(true); };
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this reel?')) {
-      const success = await deleteReel(id);
-      if (success) {
-        onRefetch();
-      }
+    if (confirm('Delete this reel?')) {
+      const ok = await deleteReel(id);
+      if (ok) onRefetch();
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Top Performing Reels</CardTitle>
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <Button onClick={() => { setEditingReel(null); setEditorOpen(true); }} className="bg-[#0064e0] hover:bg-[#0052c2] text-white">
-                Create new
-              </Button>
-            )}
-            <ExportButton reels={reels} />
-          </div>
+    <div className="bg-white border border-[#DADDE1] rounded-lg overflow-hidden">
+      {/* Table header toolbar */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#DADDE1]">
+        <h3 className="text-sm font-semibold text-[#1C1E21]">Top Performing Reels</h3>
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+              onClick={() => { setEditingReel(null); setEditorOpen(true); }}
+              className="flex items-center gap-1.5 bg-[#0064E0] hover:bg-[#0052C2] text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create
+            </button>
+          )}
+          <ExportButton reels={reels} />
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">Rank</TableHead>
-                <TableHead className="w-16">Preview</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Published</TableHead>
-                <TableHead className="text-right">Views</TableHead>
-                <TableHead className="text-right">Likes</TableHead>
-                <TableHead className="text-right">Comments</TableHead>
-                <TableHead className="text-right">Engagement</TableHead>
-                <TableHead className="text-right">Spend</TableHead>
-                <TableHead className="text-right">CPM</TableHead>
-                {isAdmin && <TableHead className="text-right">Actions</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {reels.slice(0, 10).map((reel, index) => (
-                <TableRow key={reel.id}>
-                  <TableCell className="font-bold text-instagram-pink">{index + 1}</TableCell>
-                  <TableCell>
-                    <InstagramPreview url={reel.reel_url} size="small" />
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate">{reel.title || 'Untitled'}</TableCell>
-                  <TableCell>{formatDate(reel.published_date)}</TableCell>
-                  <TableCell className="text-right font-medium">{formatNumber(reel.total_views)}</TableCell>
-                  <TableCell className="text-right">{formatNumber(reel.organic_likes)}</TableCell>
-                  <TableCell className="text-right">{formatNumber(reel.organic_comments)}</TableCell>
-                  <TableCell className="text-right font-medium text-green-600">
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="border-b border-[#DADDE1] bg-[#F8F9FA]">
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap w-10">#</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap w-12">Preview</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Ad Name</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Published</th>
+              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Views</th>
+              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Likes</th>
+              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Comments</th>
+              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Engagement</th>
+              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Spend</th>
+              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">CPM</th>
+              {isAdmin && <th className="text-right px-4 py-2.5 text-xs font-semibold text-[#65676B] whitespace-nowrap">Actions</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {reels.slice(0, 10).map((reel, index) => (
+              <tr key={reel.id} className="border-b border-[#DADDE1] hover:bg-[#F0F2F5] transition-colors">
+                <td className="px-4 py-3 text-xs font-bold text-[#0064E0]">{index + 1}</td>
+                <td className="px-4 py-3">
+                  <InstagramPreview url={reel.reel_url} size="small" />
+                </td>
+                <td className="px-4 py-3 max-w-[200px] truncate text-[13px] font-medium text-[#1C1E21]">
+                  {reel.title || 'Untitled'}
+                </td>
+                <td className="px-4 py-3 text-[13px] text-[#65676B] whitespace-nowrap">
+                  {formatDate(reel.published_date)}
+                </td>
+                <td className="px-4 py-3 text-right text-[13px] font-medium text-[#1C1E21]">
+                  {formatNumber(reel.total_views)}
+                </td>
+                <td className="px-4 py-3 text-right text-[13px] text-[#1C1E21]">
+                  {formatNumber(reel.organic_likes)}
+                </td>
+                <td className="px-4 py-3 text-right text-[13px] text-[#1C1E21]">
+                  {formatNumber(reel.organic_comments)}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <span className="text-[13px] font-semibold text-[#2DA44E]">
                     {reel.engagement_rate}%
-                  </TableCell>
-                  <TableCell className="text-right font-medium">{formatINR(reel.total_promotion_spend)}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    {reel.cost_per_1k_views > 0 ? formatINR(reel.cost_per_1k_views) : '-'}
-                  </TableCell>
-                  {isAdmin && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(reel)} className="h-8 w-8 text-blue-600">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(reel.id)} className="h-8 w-8 text-red-600">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right text-[13px] font-medium text-[#1C1E21]">
+                  {formatINR(reel.total_promotion_spend)}
+                </td>
+                <td className="px-4 py-3 text-right text-[13px] text-[#1C1E21]">
+                  {reel.cost_per_1k_views > 0 ? formatINR(reel.cost_per_1k_views) : '—'}
+                </td>
+                {isAdmin && (
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        onClick={() => handleEdit(reel)}
+                        className="h-7 w-7 flex items-center justify-center rounded hover:bg-[#E7F3FF] text-[#0064E0] transition-colors"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(reel.id)}
+                        className="h-7 w-7 flex items-center justify-center rounded hover:bg-red-50 text-[#FA3E3E] transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer */}
+      <div className="px-5 py-3 border-t border-[#DADDE1] flex items-center justify-between">
+        <span className="text-xs text-[#65676B]">
+          Showing top {Math.min(reels.length, 10)} of {reels.length} reels
+        </span>
+        <Link
+          href="/dashboard/ads"
+          className="text-xs font-semibold text-[#0064E0] hover:underline flex items-center gap-1"
+        >
+          View all ads
+          <ArrowUpRight className="h-3 w-3" />
+        </Link>
+      </div>
+
       {editorOpen && (
-        <ReelEditorDialog 
-          open={editorOpen} 
-          onOpenChange={setEditorOpen} 
-          initialData={editingReel} 
-          onSaved={onRefetch} 
+        <ReelEditorDialog
+          open={editorOpen}
+          onOpenChange={setEditorOpen}
+          initialData={editingReel}
+          onSaved={onRefetch}
         />
       )}
-    </Card>
+    </div>
   );
 }
 
-function GlobalFilters({
-  filters,
-  onFiltersChange,
-  campaigns,
-  usernames,
-}: {
-  filters: FilterState;
-  onFiltersChange: (filters: FilterState) => void;
-  campaigns: { id: string; name: string }[];
-  usernames: string[];
-}) {
-  return (
-    <Card className="no-print">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Filter className="h-4 w-4" />
-          Global Filters
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <Label>Date Range</Label>
-            <DateRangePicker
-              from={filters.date_from}
-              to={filters.date_to}
-              onChange={(range) => onFiltersChange({ ...filters, date_from: range.from, date_to: range.to })}
-            />
-          </div>
-          <div>
-            <Label>Campaign</Label>
-            <Select
-              value={filters.campaign_ids.join(',')}
-              onValueChange={(value) => onFiltersChange({ ...filters, campaign_ids: value ? value.split(',') : [] })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All campaigns" />
-              </SelectTrigger>
-              <SelectContent>
-                {campaigns.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Username</Label>
-            <Select
-              value={filters.usernames.join(',')}
-              onValueChange={(value) => onFiltersChange({ ...filters, usernames: value ? value.split(',') : [] })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All creators" />
-              </SelectTrigger>
-              <SelectContent>
-                {usernames.map(u => (
-                  <SelectItem key={u} value={u}>{u}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Min Engagement Rate (%)</Label>
-            <Input
-              type="number"
-              step="0.1"
-              min="0"
-              max="100"
-              value={filters.min_engagement_rate || ''}
-              onChange={(e) => onFiltersChange({ ...filters, min_engagement_rate: e.target.value ? parseFloat(e.target.value) : null })}
-              placeholder="0"
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
 export function DashboardContent() {
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'adsets' | 'ads'>('overview');
   const [filters, setFilters] = useState<FilterState>({
     date_from: format(subMonths(new Date(), 3), 'yyyy-MM-dd'),
     date_to: format(new Date(), 'yyyy-MM-dd'),
@@ -502,125 +260,224 @@ export function DashboardContent() {
   const { metrics, charts, highlights, loading, error, refetch } = useDashboardMetrics(filters);
   const { reels, refetch: refetchReels } = useReels({ filters, pageSize: 50 });
 
-  const handleRefetch = () => {
-    refetch();
-    refetchReels();
-  };
+  const handleRefetch = () => { refetch(); refetchReels(); };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-instagram-pink border-t-transparent" />
+      <div className="flex flex-col gap-6">
+        {/* Loading skeleton */}
+        <div className="bg-white border border-[#DADDE1] rounded-lg h-14 animate-pulse" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white border border-[#DADDE1] rounded-lg h-24 animate-pulse" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="bg-white border border-[#DADDE1] rounded-lg h-72 animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <Card className="border-destructive">
-        <CardContent className="p-6 text-center text-destructive">
-          Failed to load dashboard: {error}
-          <Button onClick={refetch} className="mt-4">Retry</Button>
-        </CardContent>
-      </Card>
+      <div className="bg-white border border-[#DADDE1] rounded-lg p-8 text-center">
+        <p className="text-[#FA3E3E] text-sm font-medium mb-3">Failed to load dashboard: {error}</p>
+        <button
+          onClick={refetch}
+          className="bg-[#0064E0] hover:bg-[#0052C2] text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+        >
+          Retry
+        </button>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-instagram-pink via-instagram-purple to-instagram-orange bg-clip-text text-transparent">
-            Dashboard
-          </h1>
-          <p className="text-muted-foreground">Instagram Reel Promotion Analytics Overview</p>
+    <div className="flex flex-col gap-5 max-w-[1400px]">
+      {/* ── Page Title Bar ─────────────────────────────────────── */}
+      <div className="bg-white border border-[#DADDE1] rounded-lg overflow-hidden">
+        {/* Title row */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#DADDE1]">
+          <div>
+            <h1 className="text-xl font-bold text-[#1C1E21]">Campaigns</h1>
+            <p className="text-xs text-[#65676B] mt-0.5">Instagram Reel Promotion Analytics</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <DateRangePicker
+              from={filters.date_from}
+              to={filters.date_to}
+              onChange={(range) => setFilters({ ...filters, date_from: range.from, date_to: range.to })}
+            />
+          </div>
+        </div>
+
+        {/* Tabs row */}
+        <div className="flex border-b border-[#DADDE1] bg-white px-3">
+          {(['overview', 'campaigns', 'adsets', 'ads'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-3 text-[13px] font-medium border-b-2 transition-colors capitalize ${
+                activeTab === tab
+                  ? 'border-[#0064E0] text-[#0064E0]'
+                  : 'border-transparent text-[#65676B] hover:text-[#1C1E21] hover:border-[#DADDE1]'
+              }`}
+            >
+              {tab === 'adsets' ? 'Ad Sets' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* ── Stat Cards Grid ────────────────────────────────────── */}
       {metrics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Total Promotion Spend"
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <StatCard
+            label="Amount Spent"
             value={formatINR(metrics.total_promotion_spend)}
-            icon={DollarSign}
-            color="text-instagram-pink"
-            subtitle={
-              <>
-                Payment via UPI: <span className="font-semibold text-gray-900">taraibabu@ybl</span>
-              </>
-            }
+            info="Total ad spend in INR"
+            subValue="via UPI: taraibabu@ybl"
           />
-          <MetricCard
-            title="Total Reels"
-            value={formatNumber(metrics.total_reels)}
-            icon={BarChart3}
-            color="text-instagram-purple"
-          />
-          <MetricCard
-            title="Total Views"
+          <StatCard
+            label="Reach"
             value={formatNumberCompact(metrics.total_views)}
-            icon={Eye}
-            color="text-instagram-orange"
+            info="Unique accounts reached"
           />
-          <MetricCard
-            title="Total Engagement"
+          <StatCard
+            label="Impressions"
+            value={formatNumberCompact(metrics.total_views)}
+            info="Total times ads were shown"
+          />
+          <StatCard
+            label="Total Reels"
+            value={formatNumber(metrics.total_reels)}
+            info="Total promoted reels"
+          />
+          <StatCard
+            label="Engagement"
             value={formatNumberCompact(metrics.total_engagement)}
-            icon={Heart}
-            color="text-green-600"
+            info="Likes + comments + shares"
           />
-
-          <MetricCard
-            title="Total Comments"
-            value={formatNumberCompact(metrics.total_comments)}
-            icon={MessageCircle}
-            color="text-blue-500"
-          />
-
-
-          <MetricCard
-            title="Engagement Rate"
+          <StatCard
+            label="Eng. Rate"
             value={`${metrics.engagement_rate}%`}
-            icon={Target}
-            color="text-teal-500"
+            info="Engagement / Impressions"
+            change={2.4}
           />
         </div>
       )}
 
-      {highlights.length > 0 && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {highlights.map(card => (
-              <HighlightCardComponent key={card.reel_id} card={card} />
-            ))}
+      {/* ── Charts ─────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {charts.viewsOverTime.length > 0 && (
+          <ChartCard title="Views Over Time">
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={charts.viewsOverTime}>
+                  <defs>
+                    <linearGradient id="metaBlueGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0064E0" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#0064E0" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#DADDE1" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11, fill: '#65676B' }}
+                    tickFormatter={(v) => format(new Date(v + '-01'), 'MMM yy')}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#65676B' }}
+                    tickFormatter={(v) => formatNumberCompact(v)}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{ border: '1px solid #DADDE1', borderRadius: 6, fontSize: 12 }}
+                    formatter={(v: number) => [formatNumber(v), 'Views']}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="views"
+                    stroke="#0064E0"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#metaBlueGrad)"
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartCard>
+        )}
+
+        {charts.engagementOverTime.length > 0 && (
+          <ChartCard title="Engagement Over Time">
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={charts.engagementOverTime}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#DADDE1" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11, fill: '#65676B' }}
+                    tickFormatter={(v) => format(new Date(v + '-01'), 'MMM yy')}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#65676B' }}
+                    tickFormatter={(v) => formatNumberCompact(v)}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{ border: '1px solid #DADDE1', borderRadius: 6, fontSize: 12 }}
+                    formatter={(v: number, name: string) => [
+                      formatNumber(v),
+                      name === 'engagement' ? 'Engagement' : name === 'views' ? 'Views' : 'Spend',
+                    ]}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line type="monotone" dataKey="engagement" stroke="#0064E0" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="views" stroke="#833AB4" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartCard>
+        )}
+      </div>
+
+      {/* ── Campaign Comparison ─────────────────────────────────── */}
+      {charts.campaignComparison.length > 0 && (
+        <ChartCard title="Campaign Comparison">
+          <div className="h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={charts.campaignComparison} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#DADDE1" />
+                <XAxis type="number" tick={{ fontSize: 11, fill: '#65676B' }} tickFormatter={(v) => formatINRCompact(v)} axisLine={false} tickLine={false} />
+                <YAxis dataKey="campaign_name" type="category" width={110} tick={{ fontSize: 11, fill: '#65676B' }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{ border: '1px solid #DADDE1', borderRadius: 6, fontSize: 12 }}
+                  formatter={(v: number, name: string) => [
+                    name === 'spend' ? formatINR(v) : formatNumber(v),
+                    name,
+                  ]}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="spend" fill="#0064E0" name="Spend" radius={[0, 3, 3, 0]} />
+                <Bar dataKey="views" fill="#7DB3F5" name="Views" radius={[0, 3, 3, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <div className="flex justify-end">
-            <Link href="/dashboard/ads">
-              <Button variant="default" className="bg-black text-white hover:bg-gray-800 hover:text-white rounded-full px-6 text-sm font-semibold h-8">
-                see more
-              </Button>
-            </Link>
-          </div>
-        </div>
+        </ChartCard>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {charts.spendVsViews.length > 0 && (
-          <SpendVsViewsChart data={charts.spendVsViews} />
-        )}
-        {charts.viewsOverTime.length > 0 && (
-          <ViewsOverTimeChart data={charts.viewsOverTime} />
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {charts.engagementOverTime.length > 0 && (
-          <EngagementOverTimeChart data={charts.engagementOverTime} />
-        )}
-        {charts.campaignComparison.length > 0 && (
-          <CampaignComparisonChart data={charts.campaignComparison} />
-        )}
-      </div>
-
+      {/* ── Top Reels Table ────────────────────────────────────── */}
       {reels.length > 0 && <TopReelsTable reels={reels} onRefetch={handleRefetch} />}
     </div>
   );
