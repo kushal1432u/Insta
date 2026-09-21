@@ -16,7 +16,9 @@ const mockUser: Profile = {
   email: 'admin@puridistrict.odisha.gov.in',
   full_name: 'Puri District Administration',
   role: 'admin',
-  created_at: new Date().toISOString()
+  created_at: new Date().toISOString(),
+  avatar_url: null,
+  updated_at: new Date().toISOString()
 };
 
 const AuthContext = createContext<AuthContextType>({
